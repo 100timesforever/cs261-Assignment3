@@ -30,8 +30,8 @@ void _initList (struct linkedList *lst) {
   /* FIXME: you must write this */
 	if(lst != NULL) {
 		lst->size = 0;
-		lst->firstLink = &(lst->lastLink)
-		lst->lastLink = &(lst->firstLink)
+		lst->firstLink = lst->lastLink;
+		lst->lastLink = lst->firstLink;
 	}
 }
 
@@ -63,13 +63,15 @@ struct linkedList *createLinkedList()
 
 void _addLinkBefore(struct linkedList *lst, struct DLink *l, TYPE v)
 {
+	struct DLink *new = malloc(sizeof(struct DLink));
 	/* FIXME: you must write this */
 	if(lst != NULL) {
 		if(l != NULL) {
-			l->next = lst->firstLink;
-			lst->firstLink = l;
-			l->back = lst->firstLink
-			lst->firstLink->next->back = l;
+			new->value = v;
+			new->next = l;
+			new->prev = l->prev;
+			l->prev->next = new;
+			l->prev = new;
 		}
 	}
 }
@@ -86,6 +88,13 @@ void _removeLink(struct linkedList *lst, struct DLink *l)
 {
 
 	/* FIXME: you must write this */
+	if(lst != NULL) {
+		if(l != NULL) {
+			l->prev->next = l->next;
+			l->next->prev = l->prev;
+			free(l);
+		}
+	}
 	
 }
 
@@ -97,8 +106,13 @@ void _removeLink(struct linkedList *lst, struct DLink *l)
 */
 int isEmptyList(struct linkedList *lst) {
  	/* FIXME: you must write this */
-	/*temporary return value...you may need to change this */
-	return(1);
+	if(lst != NULL) {
+		if(lst->firstLink == lst->lastLink && lst->lastLink != NULL && lst->firstLink != NULL) {
+			return(1);
+		}
+		else
+			return(0);
+	}
 }
 
 /* De-allocate all links of the list
@@ -136,8 +150,11 @@ void deleteLinkedList(struct linkedList *lst)
  Pre: lst is not null
  */
 void _printList(struct linkedList* lst)
-{
+{	struct DLink* itr;
 	/* FIXME: you must write this */
+	while(itr->next != lst->lastLink) {
+		printf(itr->next->value);
+	}
 
 }
 
