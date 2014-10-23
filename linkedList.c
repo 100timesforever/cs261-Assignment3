@@ -30,8 +30,8 @@ void _initList (struct linkedList *lst) {
   /* FIXME: you must write this */
 	if(lst != NULL) {
 		lst->size = 0;
-		lst->firstLink = lst->lastLink;
-		lst->lastLink = lst->firstLink;
+		lst->firstLink = NULL;
+		lst->lastLink = NULL;
 	}
 }
 
@@ -70,8 +70,14 @@ void _addLinkBefore(struct linkedList *lst, struct DLink *l, TYPE v)
 			new->value = v;
 			new->next = l;
 			new->prev = l->prev;
-			l->prev->next = new;
+			if(l->prev != NULL){
+				l->prev->next = new;
+			}
+			else{
+				lst->firstLink = new;
+			}
 			l->prev = new;
+			lst->size++;
 		}
 	}
 }
@@ -90,9 +96,21 @@ void _removeLink(struct linkedList *lst, struct DLink *l)
 	/* FIXME: you must write this */
 	if(lst != NULL) {
 		if(l != NULL) {
-			l->prev->next = l->next;
-			l->next->prev = l->prev;
+			if(l->prev != NULL && l->next != NULL) {
+				l->prev->next = l->next;
+			}
+			else if(l->prev == NULL && l->next != NULL) {
+				lst->firstLink = l->next;
+			}
+			else if(l->prev != NULL && l->next == NULL) {
+				l->prev->next = NULL;
+			}
+			else {
+				lst->firstLink = NULL;
+				lst->lastLink = NULL;
+			}
 			free(l);
+			lst->size -= 1;
 		}
 	}
 	
@@ -107,11 +125,11 @@ void _removeLink(struct linkedList *lst, struct DLink *l)
 int isEmptyList(struct linkedList *lst) {
  	/* FIXME: you must write this */
 	if(lst != NULL) {
-		if(lst->firstLink == lst->lastLink && lst->lastLink != NULL && lst->firstLink != NULL) {
-			return(1);
+		if(lst->lastLink != NULL && lst->firstLink != NULL) {
+			return(0);
 		}
 		else
-			return(0);
+			return(1);
 	}
 }
 
@@ -151,9 +169,18 @@ void deleteLinkedList(struct linkedList *lst)
  */
 void _printList(struct linkedList* lst)
 {	struct DLink* itr;
+	itr = lst->firstLink;
+	TYPE v;
 	/* FIXME: you must write this */
-	while(itr->next != lst->lastLink) {
-		printf(itr->next->value);
+	int i;
+	for(i=0; i<lst->size; i++) {
+		v = itr->value;
+		printf("%d\n", v);
+		if((lst->size - i) > 1) {
+			itr = itr->next;
+		}
+		else
+			return;
 	}
 
 }
@@ -171,8 +198,22 @@ void _printList(struct linkedList* lst)
 */
 void addFrontList(struct linkedList *lst, TYPE e)
 {
+	struct DLink *new = malloc(sizeof(struct DLink));
 
 	/* FIXME: you must write this */
+	if(lst!=NULL) {
+		if(isEmptyList(lst)){
+			new->value = e;
+			lst->firstLink = new;
+			lst->lastLink = new;
+			new->next = NULL;
+			new->prev = NULL;
+		}	
+		else{
+			_addLinkBefore(lst, lst->firstLink, e);
+		}
+	lst->size += 1;
+	}
 	
 }
 
@@ -184,8 +225,27 @@ void addFrontList(struct linkedList *lst, TYPE e)
 	post: lst is not empty, increased size by 1
 */
 void addBackList(struct linkedList *lst, TYPE e) {
-  
-	/* FIXME: you must write this */
+ 
+	struct DLink *new = malloc(sizeof(struct DLink)); 
+	
+	if(lst!=NULL) {
+		if(isEmptyList(lst)){
+			new->value = e;
+			lst->firstLink = new;
+			lst->lastLink = new;
+			new->next = NULL;
+			new->prev = NULL;
+		}	
+		else{
+			new->value = e;
+			new->prev = lst->lastLink;
+			lst->lastLink = new;
+			new->next = NULL;
+			new->prev->next = new;
+		}
+	lst->size += 1;
+	}
+	
 }
 
 /*
@@ -198,6 +258,11 @@ void addBackList(struct linkedList *lst, TYPE e) {
 TYPE frontList (struct linkedList *lst) {
 	/* FIXME: you must write this */
 	/*temporary return value...you may need to change this */
+	if(lst != NULL){
+		if(!isEmptyList(lst)){
+			return lst->firstLink->value;
+		}
+	}	
 	return(1);
 }
 
@@ -212,6 +277,11 @@ TYPE backList(struct linkedList *lst)
 {
 	/* FIXME: you must write this */
 	/*temporary return value...you may need to change this */
+	if(lst != NULL){
+		if(!isEmptyList(lst)){
+			return lst->lastLink->value;
+		}
+	}
 	return(1);
 }
 
@@ -226,7 +296,11 @@ TYPE backList(struct linkedList *lst)
 */
 void removeFrontList(struct linkedList *lst) {
    	/* FIXME: you must write this */
-
+	if(lst != NULL){
+		if(!isEmptyList(lst)){
+			_removeLink(lst, lst->firstLink);
+		}
+	}
 }
 
 /*
@@ -239,6 +313,11 @@ void removeFrontList(struct linkedList *lst) {
 void removeBackList(struct linkedList *lst)
 {	
 	/* FIXME: you must write this */
+	if(lst != NULL){
+		if(!isEmptyList(lst)){
+			_removeLink(lst, lst->lastLink);
+		}
+	}
 	
 }
 
@@ -256,7 +335,20 @@ void removeBackList(struct linkedList *lst)
  */
 void addList(struct linkedList *lst, TYPE v)
 {
+	struct DLink *new = malloc(sizeof(struct DLink));
 	/* FIXME: you must write this */
+	if(lst != NULL) {
+		if(isEmptyList(lst)){
+			lst->firstLink = new;
+			lst->lastLink = new;
+			new->next = NULL;
+		}	
+		else{
+			_addLinkBefore(lst, lst->firstLink, v);
+		}
+	lst->size += 1;
+	
+	}
 
 }
 
@@ -272,9 +364,20 @@ void addList(struct linkedList *lst, TYPE v)
 	post:	no changes to the bag
 */
 int containsList (struct linkedList *lst, TYPE e) {
+	struct DLink * itr = lst->firstLink;
+	int i;
 	/* FIXME: you must write this */
-	/*temporary return value...you may need to change this */
-	return(1);
+	if(lst != NULL) {
+		if(lst->size > 0) {
+			for(i=lst->size; i>0; i--) {
+				if(itr->value == e) {
+					return(1);
+				}
+				itr = itr->next;
+			}
+		}
+		return(0);
+	}
 }
 
 /*	Removes the first occurrence of the specified value from the collection
@@ -288,5 +391,16 @@ int containsList (struct linkedList *lst, TYPE e) {
 	post:	size of the bag is reduced by 1
 */
 void removeList (struct linkedList *lst, TYPE e) {
+	struct DLink * itr = lst->firstLink;
 	/* FIXME: you must write this */
+	if(lst != NULL) {
+		if(lst->size > 0) {
+			if(containsList(lst, e)) {
+				if(itr->value = e) {
+					_removeLink(lst, itr);
+				}
+				itr = itr->next;
+			}
+		}
+	}
 }
