@@ -148,8 +148,8 @@ int isEmptyList(struct linkedList *lst) {
 void freeLinkedList(struct linkedList *lst)
 {
 	while(!isEmptyList(lst)) {
-		printf("In the while loop\n");
-		printf("lst->size: %d\n", lst->size);
+		//printf("In the while loop\n");
+		//printf("lst->size: %d\n", lst->size);
 		/* remove the link right after the first sentinel */
 		_removeLink(lst, lst->firstLink);//->next);
 	}		
