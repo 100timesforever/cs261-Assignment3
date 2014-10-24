@@ -26,7 +26,7 @@ int main(int argc, char* argv[]) {
 	removeBackList(deque);
 	printf("removed back\n");
 	_printList(deque);
-	printf("printed the list again.");
+	printf("printed the list again.\n");
 	deleteLinkedList(deque);
 	printf("deleted and freed deque\n");
 
@@ -34,9 +34,11 @@ int main(int argc, char* argv[]) {
 	struct linkedList * bag = createLinkedList();
 	printf("linked list created\n");
 	addList(bag, 4);
-	printf("added first link");
+	_printList(bag);
+	printf("added first link\n");
 	addList(bag, 6);
-	printf("added second link");
+	printf("added second link\n");
+	_printList(bag);
 	temp = containsList(bag, 6);
 	printf("checked if list contains 6. temp should be 1, is %d\n", temp);
 	temp = containsList(bag, 9);
@@ -46,6 +48,7 @@ int main(int argc, char* argv[]) {
 	removeList(bag, 6);
 	printf("removed 6\n");
 	_printList(bag);
+	printf("DONE!!!\n");
 
 	return 0;
 }

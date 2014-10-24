@@ -78,6 +78,7 @@ void _addLinkBefore(struct linkedList *lst, struct DLink *l, TYPE v)
 			}
 			l->prev = new;
 			lst->size++;
+			//printf("size in _addLinkBefore: %d\n", lst->size);
 		}
 	}
 }
@@ -96,14 +97,18 @@ void _removeLink(struct linkedList *lst, struct DLink *l)
 	/* FIXME: you must write this */
 	if(lst != NULL) {
 		if(l != NULL) {
+			//assert(lst->size > 0);
 			if(l->prev != NULL && l->next != NULL) {
 				l->prev->next = l->next;
+				l->next->prev = l->prev;
 			}
 			else if(l->prev == NULL && l->next != NULL) {
 				lst->firstLink = l->next;
+				l->next->prev = NULL;
 			}
 			else if(l->prev != NULL && l->next == NULL) {
 				l->prev->next = NULL;
+				lst->lastLink = l->prev;
 			}
 			else {
 				lst->firstLink = NULL;
@@ -125,12 +130,13 @@ void _removeLink(struct linkedList *lst, struct DLink *l)
 int isEmptyList(struct linkedList *lst) {
  	/* FIXME: you must write this */
 	if(lst != NULL) {
-		if(lst->lastLink != NULL && lst->firstLink != NULL) {
-			return(0);
+		if(lst->lastLink == NULL && lst->firstLink == NULL) {
+			return(1);
 		}
 		else
-			return(1);
+			return(0);
 	}
+	return 1; //In the case where the list is equal to NULL, return 1.
 }
 
 /* De-allocate all links of the list
@@ -142,12 +148,14 @@ int isEmptyList(struct linkedList *lst) {
 void freeLinkedList(struct linkedList *lst)
 {
 	while(!isEmptyList(lst)) {
+		printf("In the while loop\n");
+		printf("lst->size: %d\n", lst->size);
 		/* remove the link right after the first sentinel */
-		_removeLink(lst, lst->firstLink->next);
+		_removeLink(lst, lst->firstLink);//->next);
 	}		
 	/* remove the first and last sentinels */
-	free(lst->firstLink);
-	free(lst->lastLink);	
+	//free(lst->firstLink);
+	//free(lst->lastLink);	
 }
 
 /* 	Deallocate all the links and the linked list itself. 
@@ -158,7 +166,7 @@ void freeLinkedList(struct linkedList *lst)
 */
 void deleteLinkedList(struct linkedList *lst)
 {
-	assert (lst != 0);
+	assert (lst != NULL);
 	freeLinkedList(lst);
 	free(lst);
 }
@@ -176,13 +184,16 @@ void _printList(struct linkedList* lst)
 	for(i=0; i<lst->size; i++) {
 		v = itr->value;
 		printf("%d\n", v);
-		if((lst->size - i) > 1) {
+		//printf("i:%d   size:%d\n", i, lst->size);
+		if((lst->size - i) > 0) {
+			//printf("iterating iter\n");
 			itr = itr->next;
 		}
-		else
+		else{
 			return;
+		}
 	}
-
+//	printf("Hopefully exiting _printList\n");
 }
 
 /* ************************************************************************
@@ -208,13 +219,13 @@ void addFrontList(struct linkedList *lst, TYPE e)
 			lst->lastLink = new;
 			new->next = NULL;
 			new->prev = NULL;
+			lst->size++;
 		}	
 		else{
 			_addLinkBefore(lst, lst->firstLink, e);
 		}
-	lst->size += 1;
 	}
-	
+//	printf("size in ADDFRONTLIST: %d\n", lst->size);
 }
 
 /*
@@ -244,6 +255,7 @@ void addBackList(struct linkedList *lst, TYPE e) {
 			new->prev->next = new;
 		}
 	lst->size += 1;
+	//printf("LIST SIZE IN ADD BACK: %d\n", lst->size);
 	}
 	
 }
@@ -323,7 +335,7 @@ void removeBackList(struct linkedList *lst)
 
 
 /* ************************************************************************
-	Stack Interface Functions
+	Bag Interface Functions
 ************************************************************************ */
 
 /* 
@@ -342,11 +354,13 @@ void addList(struct linkedList *lst, TYPE v)
 			lst->firstLink = new;
 			lst->lastLink = new;
 			new->next = NULL;
+			new->prev = NULL;
+			new->value = v;
+			lst->size += 1;
 		}	
 		else{
 			_addLinkBefore(lst, lst->firstLink, v);
 		}
-	lst->size += 1;
 	
 	}
 
@@ -369,15 +383,16 @@ int containsList (struct linkedList *lst, TYPE e) {
 	/* FIXME: you must write this */
 	if(lst != NULL) {
 		if(lst->size > 0) {
-			for(i=lst->size; i>0; i--) {
+			for(i=0; i < lst->size - 1; i++) {
 				if(itr->value == e) {
 					return(1);
 				}
 				itr = itr->next;
 			}
 		}
-		return(0);
 	}
+	return(0);//once agian, if list is NULl, it can't be contained in it. 
+			  //(This part is mainly to make gcc happy)
 }
 
 /*	Removes the first occurrence of the specified value from the collection
@@ -396,7 +411,7 @@ void removeList (struct linkedList *lst, TYPE e) {
 	if(lst != NULL) {
 		if(lst->size > 0) {
 			if(containsList(lst, e)) {
-				if(itr->value = e) {
+				if(itr->value == e) {
 					_removeLink(lst, itr);
 				}
 				itr = itr->next;
